@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Eventos - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .animate-hover:hover {
+            animation: pulse 1s infinite;
+        }
+        .sidebar-expanded {
+            width: 240px;
+        }
+        .sidebar-collapsed {
+            width:85px;
+        }
+        .sidebar-transition {
+            transition: width 0.3s ease;
+        }
+        .content-transition {
+            transition: margin-left 0.3s ease;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .slide-in {
+            animation: slideIn 0.5s ease-in-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <!-- Sidebar -->
+    <div id="sidebar" class="fixed inset-y-0 left-0 bg-gray-800 shadow-xl sidebar-transition sidebar-collapsed z-50">
+        <div class="flex flex-col h-full">
+            <!-- Logo Area -->
+            <div class="flex items-center justify-center h-16 border-b border-gray-700">
+                <i class='bx bx-cube-alt text-3xl text-blue-400'></i>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 pt-4">
+                <div class="sidebar-item group active">
+                    <a href="#" class="flex flex-col items-center px-2 py-3 text-gray-300 hover:bg-gray-700 hover:text-white relative group">
+                        <i class='bx bx-grid-alt text-2xl mb-1'></i>
+                        <span class="text-xs sidebar-text">Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-item group">
+                    <a href="#" class="flex flex-col items-center px-2 py-3 text-gray-300 hover:bg-gray-700 hover:text-white relative group">
+                        <i class='bx bx-calendar-event text-2xl mb-1'></i>
+                        <span class="text-xs sidebar-text">Eventos</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-item group">
+                    <a href="#" class="flex flex-col items-center px-2 py-3 text-gray-300 hover:bg-gray-700 hover:text-white relative group">
+                        <i class='bx bx-user-voice text-2xl mb-1'></i>
+                        <span class="text-xs sidebar-text">Participantes</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-item group">
+                    <a href="#" class="flex flex-col items-center px-2 py-3 text-gray-300 hover:bg-gray-700 hover:text-white relative group">
+                        <i class='bx bx-line-chart text-2xl mb-1'></i>
+                        <span class="text-xs sidebar-text">Análises</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-item group">
+                    <a href="#" class="flex flex-col items-center px-2 py-3 text-gray-300 hover:bg-gray-700 hover:text-white relative group">
+                        <i class='bx bx-message-square-dots text-2xl mb-1'></i>
+                        <span class="text-xs sidebar-text">Mensagens</span>
+                    </a>
+                </div>
+            </nav>
+
+            <!-- Bottom Section -->
+            <div class="border-t border-gray-700 p-4">
+                <div class="sidebar-item group">
+                    <a href="#" class="flex flex-col items-center text-gray-300 hover:bg-gray-700 hover:text-white relative group rounded-lg p-2">
+                        <i class='bx bx-cog text-2xl mb-1'></i>
+                        <span class="text-xs sidebar-text">Configurações</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="ml-[70px] content-transition">
+        <!-- Top Navigation -->
+        <nav class="bg-gray-800 shadow-lg sticky top-0 z-40">
+            <div class="mx-auto px-4">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center">
+                        <button id="sidebar-toggle" class="text-gray-400 hover:text-white">
+                            <i class='bx bx-menu text-2xl'></i>
+                        </button>
+                        <div class="ml-4">
+                            <h1 class="text-xl font-bold text-white">Dashboard</h1>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <!-- Search -->
+                        <div class="hidden md:block relative">
+                            <input type="text" placeholder="Buscar..." class="bg-gray-700 text-white px-4 py-2 rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <i class='bx bx-search absolute left-3 top-2.5 text-gray-400'></i>
+                        </div>
+
+                        <!-- Notifications -->
+                        <button id="notifications-btn" class="relative p-2 text-gray-400 hover:text-white">
+                            <i class='bx bx-bell text-xl'></i>
+                            <span class="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500"></span>
+                        </button>
+
+                        <!-- User Menu -->
+                        <div class="relative group">
+                            <button class="flex items-center space-x-3">
+                                <img class="h-8 w-8 rounded-full border-2 border-blue-400" src="https://via.placeholder.com/150" alt="User avatar">
+                                <span class="hidden md:block text-sm font-medium text-gray-300">John Doe</span>
+                                <i class='bx bx-chevron-down text-gray-400'></i>
+                            </button>
+                            <!-- Dropdown Menu -->
+                            <div class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl py-2 hidden group-hover:block">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">
+                                    <i class='bx bx-user mr-2'></i>Perfil
+                                </a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">
+                                    <i class='bx bx-cog mr-2'></i>Configurações
+                                </a>
+                                <div class="border-t border-gray-700 my-1"></div>
+                                <a href="#" class="block px-4 py-2 text-sm text-red-400 hover:bg-gray-700">
+                                    <i class='bx bx-log-out mr-2'></i>Sair
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <div class="p-6">
+            <!-- Quick Actions -->
+            <div class="mb-8 fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <button onclick="showNewEventModal()" class="flex items-center justify-center p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors animate-hover">
+                        <i class='bx bx-plus-circle mr-2 text-xl'></i>
+                        <span>Novo Evento</span>
+                    </button>
+                    <button onclick="exportData()" class="flex items-center justify-center p-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors animate-hover">
+                        <i class='bx bx-export mr-2 text-xl'></i>
+                        <span>Exportar Dados</span>
+                    </button>
+                    <button onclick="showNewsletterModal()" class="flex items-center justify-center p-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors animate-hover">
+                        <i class='bx bx-envelope mr-2 text-xl'></i>
+                        <span>Newsletter</span>
+                    </button>
+                    <button onclick="showReportsModal()" class="flex items-center justify-center p-4 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors animate-hover">
+                        <i class='bx bx-file mr-2 text-xl'></i>
+                        <span>Relatórios</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Status Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Total de Eventos -->
+                <div class="bg-gray-800 p-6 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 slide-in">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-400 text-sm">Total de Eventos</p>
+                            <h3 class="text-2xl font-bold text-blue-400">53</h3>
+                            <div class="flex items-center mt-2">
+                                <span class="text-green-400 text-sm mr-2">
+                                    <i class='bx bx-up-arrow-alt'></i>
+                                    15%
+                                </span>
+                                <span class="text-gray-400 text-xs">vs mês anterior</span>
+                            </div>
+                        </div>
+                        <div class="bg-blue-500 bg-opacity-20 p-4 rounded-full">
+                            <i class='bx bx-calendar text-2xl text-blue-400'></i>
+                        </div>
+                    </div>
+                    <!-- Progress bar -->
+                    <div class="mt-4">
+                        <div class="flex justify-between text-sm text-gray-400 mb-1">
+                            <span>Progresso</span>
+                            <span>85%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div class="bg-blue-500 h-2 rounded-full" style="width: 85%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Participantes Ativos -->
+                <div class="bg-gray-800 p-6 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 slide-in" style="animation-delay: 0.2s;">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-400 text-sm">Participantes Ativos</p>
+                            <h3 class="text-2xl font-bold text-green-400">1,234</h3>
+                            <div class="flex items-center mt-2">
+                                <span class="text-green-400 text-sm mr-2">
+                                    <i class='bx bx-up-arrow-alt'></i>
+                                    12%
+                                </span>
+                                <span class="text-gray-400 text-xs">vs mês anterior</span>
+                            </div>
+                        </div>
+                        <div class="bg-green-500 bg-opacity-20 p-4 rounded-full">
+                            <i class='bx bx-group text-2xl text-green-400'></i>
+                        </div>
+                    </div>
+                    <!-- Activity Chart -->
+                    <div class="mt-4">
+                        <canvas id="participantsChart" width="300" height="100"></canvas>
+                    </div>
+                </div>
+
+                <!-- Taxa de Conclusão -->
+                <div class="bg-gray-800 p-6 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 slide-in" style="animation-delay: 0.4s;">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-400 text-sm">Taxa de Conclusão</p>
+                            <h3 class="text-2xl font-bold text-purple-400">92%</h3>
+                            <div class="flex items-center mt-2">
+                                <span class="text-green-400 text-sm mr-2">
+                                    <i class='bx bx-up-arrow-alt'></i>
+                                    5%
+                                </span>
+                                <span class="text-gray-400 text-xs">vs mês anterior</span>
+                            </div>
+                        </div>
+                        <div class="bg-purple-500 bg-opacity-20 p-4 rounded-full">
+                            <i class='bx bx-check-circle text-2xl text-purple-400'></i>
+                        </div>
+                    </div>
+                    <!-- Donut Chart -->
+                    <div class="mt-4">
+                        <canvas id="completionRateChart" width="300" height="150"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Events Table -->
+            <div class="bg-gray-800 rounded-lg shadow-xl overflow-hidden fade-in">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold mb-4">Eventos Recentes</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="bg-gray-700">
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Evento</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Data</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Participantes</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-700" id="eventsTableBody">
+                                <!-- Table rows will be dynamically inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Event Modal -->
+    <div id="newEventModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-4">Novo Evento</h2>
+            <form id="newEventForm">
+                <div class="mb-4">
+                    <label for="eventName" class="block text-sm font-medium text-gray-300 mb-2">Nome do Evento</label>
+                    <input type="text" id="eventName" name="eventName" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label for="eventDate" class="block text-sm font-medium text-gray-300 mb-2">Data do Evento</label>
+                    <input type="date" id="eventDate" name="eventDate" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label for="eventLocation" class="block text-sm font-medium text-gray-300 mb-2">Local</label>
+                    <input type="text" id="eventLocation" name="eventLocation" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" onclick="closeNewEventModal()" class="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white mr-2">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Criar Evento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Sidebar Toggle
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebarTexts = document.querySelectorAll('.sidebar-text');
+
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-expanded');
+            sidebar.classList.toggle('sidebar-collapsed');
+            mainContent.classList.toggle('ml-[240px]');
+            mainContent.classList.toggle('ml-[70px]');
+            sidebarTexts.forEach(text => text.classList.toggle('hidden'));
+        });
+
+        // Notifications
+        const notificationsBtn = document.getElementById('notifications-btn');
+        notificationsBtn.addEventListener('click', () => {
+            Swal.fire({
+                title: 'Notificações',
+                html: '<p>Você tem 3 novas notificações.</p>',
+                icon: 'info',
+                confirmButtonText: 'OK'
+            });
+        });
+
+        // New Event Modal
+        function showNewEventModal() {
+            document.getElementById('newEventModal').classList.remove('hidden');
+            document.getElementById('newEventModal').classList.add('flex');
+        }
+
+        function closeNewEventModal() {
+            document.getElementById('newEventModal').classList.add('hidden');
+            document.getElementById('newEventModal').classList.remove('flex');
+        }
+
+        document.getElementById('newEventForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Here you would typically send the form data to your backend
+            // For this example, we'll just close the modal and show a success message
+            closeNewEventModal();
+            Swal.fire({
+                title: 'Sucesso!',
+                text: 'Novo evento criado com sucesso.',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+        });
+
+        // Export Data
+        function exportData() {
+            Swal.fire({
+                title: 'Exportar Dados',
+                text: 'Seus dados estão sendo exportados. Você receberá um email quando estiver pronto.',
+                icon: 'info',
+                confirmButtonText: 'OK'
+            });
+        }
+
+        // Newsletter Modal
+        function showNewsletterModal() {
+            Swal.fire({
+                title: 'Enviar Newsletter',
+                html:
+                    '<input id="swal-input1" class="swal2-input" placeholder="Assunto">' +
+                    '<textarea id="swal-input2" class="swal2-textarea" placeholder="Conteúdo da newsletter"></textarea>',
+                focusConfirm: false,
+                preConfirm: () => {
+                    return [
+                        document.getElementById('swal-input1').value,
+                        document.getElementById('swal-input2').value
+                    ]
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Enviado!', 'Sua newsletter foi enviada com sucesso.', 'success')
+                }
+            })
+        }
+
+        // Reports Modal
+        function showReportsModal() {
+            Swal.fire({
+                title: 'Relatórios',
+                html:
+                    '<button id="report1" class="swal2-confirm swal2-styled" style="display:inline-block;margin:5px;">Relatório de Participação</button>' +
+                    '<button id="report2" class="swal2-confirm swal2-styled" style="display:inline-block;margin:5px;">Relatório Financeiro</button>' +
+                    '<button id="report3" class="swal2-confirm swal2-styled" style="display:inline-block;margin:5px;">Relatório de Feedback</button>',
+                showConfirmButton: false
+            })
+
+            document.getElementById('report1').addEventListener('click', () => {
+                Swal.fire('Relatório de Participação', 'O relatório está sendo gerado e será enviado para o seu email.', 'info');
+            });
+
+            document.getElementById('report2').addEventListener('click', () => {
+                Swal.fire('Relatório Financeiro', 'O relatório está sendo gerado e será enviado para o seu email.', 'info');
+            });
+
+            document.getElementById('report3').addEventListener('click', () => {
+                Swal.fire('Relatório de Feedback', 'O relatório está sendo gerado e será enviado para o seu email.', 'info');
+            });
+        }
+
+        // Charts
+        const participantsCtx = document.getElementById('participantsChart').getContext('2d');
+        new Chart(participantsCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                datasets: [{
+                    label: 'Participantes Ativos',
+                    data: [1000, 1200, 1100, 1300, 1400, 1234],
+                    borderColor: 'rgb(34, 197, 94)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        const completionRateCtx = document.getElementById('completionRateChart').getContext('2d');
+        new Chart(completionRateCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Concluído', 'Pendente'],
+                datasets: [{
+                    data: [92, 8],
+                    backgroundColor: ['rgb(168, 85, 247)', 'rgb(55, 65, 81)'],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Populate Events Table
+        const eventsData = [
+            { name: 'Tech Conference 2024', date: '10 Dez 2024', time: '09:00 - 18:00', location: 'São Paulo, SP', participants: '250/300', status: 'Ativo' },
+            { name: 'Workshop de IA', date: '15 Jan 2025', time: '14:00 - 17:00', location: 'Rio de Janeiro, RJ', participants: '80/100', status: 'Planejado' },
+            { name: 'Hackathon de Inovação', date: '5 Fev 2025', time: '09:00 - 21:00', location: 'Belo Horizonte, MG', participants: '150/200', status: 'Ativo' },
+            { name: 'Seminário de Blockchain', date: '20 Mar 2025', time: '10:00 - 16:00', location: 'Curitiba, PR', participants: '120/150', status: 'Planejado' }
+        ];
+
+        const eventsTableBody = document.getElementById('eventsTableBody');
+
+        eventsData.forEach((event, index) => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-gray-700 transition-all duration-200';
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                        <div class="h-10 w-10 flex-shrink-0">
+                            <img class="h-10 w-10 rounded-full" src="https://via.placeholder.com/150" alt="Event image">
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-sm font-medium">${event.name}</div>
+                            <div class="text-sm text-gray-400">${event.location}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm">${event.date}</div>
+                    <div class="text-sm text-gray-400">${event.time}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm">${event.participants}</div>
+                    <div class="w-full bg-gray-700 rounded-full h-2">
+                        <div class="bg-blue-500 h-2 rounded-full" style="width: ${parseInt(event.participants.split('/')[0]) / parseInt(event.participants.split('/')[1]) * 100}%"></div>
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <select onchange="updateEventStatus(this, ${index})" class="bg-transparent border-0 text-sm font-semibold rounded-full px-2 py-1 ${event.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                        <option value="Ativo" ${event.status === 'Ativo' ? 'selected' : ''}>Ativo</option>
+                        <option value="Concluído" ${event.status === 'Concluído' ? 'selected' : ''}>Concluído</option>
+                    </select>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <button onclick="editEvent(${index})" class="text-blue-400 hover:text-blue-300 mr-2" title="Editar">
+                        <i class="bx bx-edit"></i>
+                    </button>
+                    <button onclick="deleteEvent(${index})" class="text-red-400 hover:text-red-300 mr-2" title="Remover">
+                        <i class="bx bx-trash"></i>
+                    </button>
+                    <button onclick="viewParticipants(${index})" class="text-green-400 hover:text-green-300 mr-2" title="Ver Inscritos">
+                        <i class="bx bx-user-check"></i>
+                    </button>
+                    <button onclick="viewEventDetails(${index})" class="text-purple-400 hover:text-purple-300" title="Visualizar Evento">
+                        <i class="bx bx-show"></i>
+                    </button>
+                </td>
+            `;
+            eventsTableBody.appendChild(row);
+        });
+
+        function updateEventStatus(selectElement, index) {
+            const newStatus = selectElement.value;
+            eventsData[index].status = newStatus;
+            selectElement.className = `bg-transparent border-0 text-sm font-semibold rounded-full px-2 py-1 ${newStatus === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+        }
+
+        function editEvent(index) {
+            const event = eventsData[index];
+            Swal.fire({
+                title: 'Editar Evento',
+                html:
+                    `<input id="swal-input1" class="swal2-input" value="${event.name}" placeholder="Nome do Evento">` +
+                    `<input id="swal-input2" class="swal2-input" value="${event.date}" placeholder="Data do Evento">` +
+                    `<input id="swal-input3" class="swal2-input" value="${event.location}" placeholder="Local do Evento">`,
+                focusConfirm: false,
+                preConfirm: () => {
+                    return [
+                        document.getElementById('swal-input1').value,
+                        document.getElementById('swal-input2').value,
+                        document.getElementById('swal-input3').value
+                    ]
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Here you would typically update the event in your backend
+                    Swal.fire('Atualizado!', 'O evento foi atualizado com sucesso.', 'success')
+                }
+            })
+        }
+
+        function deleteEvent(index) {
+            Swal.fire({
+                title: 'Tem certeza?',
+                text: "Você não poderá reverter esta ação!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sim, delete!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Here you would typically delete the event from your backend
+                    Swal.fire(
+                        'Deletado!',
+                        'O evento foi removido com sucesso.',
+                        'success'
+                    )
+                }
+            })
+        }
+
+        function viewParticipants(index) {
+            const event = eventsData[index];
+            Swal.fire({
+                title: `Participantes - ${event.name}`,
+                text: `Total de participantes: ${event.participants}`,
+                icon: 'info'
+            });
+        }
+
+        function viewEventDetails(index) {
+            const event = eventsData[index];
+            Swal.fire({
+                title: event.name,
+                html: `
+                    <p><strong>Data:</strong> ${event.date}</p>
+                    <p><strong>Horário:</strong> ${event.time}</p>
+                    <p><strong>Local:</strong> ${event.location}</p>
+                    <p><strong>Participantes:</strong> ${event.participants}</p>
+                    <p><strong>Status:</strong> ${event.status}</p>
+                `,
+                icon: 'info'
+            });
+        }
+    </script>
+</body>
+</html>
