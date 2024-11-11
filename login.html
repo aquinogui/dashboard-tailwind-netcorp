@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema de Gerenciamento de Eventos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-gray-800 rounded-lg shadow-xl overflow-hidden fade-in">
+        <div class="p-6 space-y-6">
+            <div class="text-center">
+                <i class='bx bx-cube-alt text-6xl text-blue-500'></i>
+                <h2 class="mt-4 text-2xl font-bold text-white">Login</h2>
+                <p class="mt-1 text-sm text-gray-400">Sistema de Gerenciamento de Eventos</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex rounded-md overflow-hidden">
+                    <button id="participantTab" class="flex-1 px-4 py-2 bg-gray-700 text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ease-in-out">Participante</button>
+                    <button id="adminTab" class="flex-1 px-4 py-2 bg-gray-600 text-gray-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ease-in-out">Administrador</button>
+                </div>
+
+                <form id="loginForm" class="space-y-4">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                        <div class="relative">
+                            <i class='bx bx-envelope absolute text-gray-400 top-3 left-3'></i>
+                            <input type="email" id="email" name="email" class="w-full pl-10 pr-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required placeholder="seu@email.com">
+                        </div>
+                    </div>
+
+                    <div id="passwordField" class="hidden">
+                        <label for="password" class="block text-sm font-medium text-gray-300 mb-1">Senha</label>
+                        <div class="relative">
+                            <i class='bx bx-lock-alt absolute text-gray-400 top-3 left-3'></i>
+                            <input type="password" id="password" name="password" class="w-full pl-10 pr-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" placeholder="Sua senha">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center">
+                        <input type="checkbox" id="remember" name="remember" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="remember" class="ml-2 block text-sm text-gray-300">
+                            Lembrar-me
+                        </label>
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-300">
+                        Entrar
+                    </button>
+                </form>
+
+                <div class="flex justify-center space-x-4">
+                    <button class="text-gray-400 hover:text-white transition duration-200">
+                        <i class='bx bxl-facebook text-2xl'></i>
+                    </button>
+                    <button class="text-gray-400 hover:text-white transition duration-200">
+                        <i class='bx bxl-google text-2xl'></i>
+                    </button>
+                    <button class="text-gray-400 hover:text-white transition duration-200">
+                        <i class='bx bxl-apple text-2xl'></i>
+                    </button>
+                </div>
+
+                <div class="text-center">
+                    <a href="#" class="text-sm text-blue-400 hover:underline">Esqueceu sua senha?</a>
+                </div>
+
+                <div class="text-center">
+                    <select id="language-select" class="bg-gray-700 text-white text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 p-2">
+                        <option value="pt-BR">Português (BR)</option>
+                        <option value="en-US">English (US)</option>
+                        <option value="es-ES">Español</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const participantTab = document.getElementById('participantTab');
+        const adminTab = document.getElementById('adminTab');
+        const passwordField = document.getElementById('passwordField');
+        const loginForm = document.getElementById('loginForm');
+
+        participantTab.addEventListener('click', () => {
+            participantTab.classList.add('bg-gray-700', 'text-white');
+            participantTab.classList.remove('bg-gray-600', 'text-gray-300');
+            adminTab.classList.add('bg-gray-600', 'text-gray-300');
+            adminTab.classList.remove('bg-gray-700', 'text-white');
+            passwordField.classList.add('hidden');
+        });
+
+        adminTab.addEventListener('click', () => {
+            adminTab.classList.add('bg-gray-700', 'text-white');
+            adminTab.classList.remove('bg-gray-600', 'text-gray-300');
+            participantTab.classList.add('bg-gray-600', 'text-gray-300');
+            participantTab.classList.remove('bg-gray-700', 'text-white');
+            passwordField.classList.remove('hidden');
+        });
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const isAdmin = !passwordField.classList.contains('hidden');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (isAdmin && !password) {
+                alert('Por favor, insira a senha para login de administrador.');
+                return;
+            }
+
+            console.log('Login attempt:', { isAdmin, email, password });
+            alert(`Login ${isAdmin ? 'de administrador' : 'de participante'} bem-sucedido para ${email}`);
+        });
+    </script>
+</body>
+</html>
